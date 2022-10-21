@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<launch>
+  <include file="$(find xarm7_moveit_config)/launch/demo.launch" />
+
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="camera_link" />
+    <param name="io_method" value="mmap"/>
+  </node>
+
+  <node name="image_view" pkg="image_view" type="image_view" output="screen">
+    <remap from="image" to="usb_cam/image_raw" />
+  </node>
+
+  <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen">
+    <param name="marker_size"           type="double" value="6.8" />
+    <param name="max_new_marker_error"  type="double" value="0.08" />
+    <param name="max_track_error"       type="double" value="0.2" />
+    <param name="output_frame"          type="string" value="camera_link" />
+    <remap from="camera_image"  to="usb_cam/image_raw" />
+    <remap from="camera_info"   to="usb_cam/camera_info" />
+  </node>
+
+  <node name="pose_goal_ar" pkg="movegroup_ar" type="pose_goal_ar" output="screen" />
+</launch>
